@@ -42,7 +42,7 @@
     return $.ajax({
       url: 'https://api.500px.com/v1/photos/search',
       data: {
-        geo: '43.65,-79.379, 4km', 
+        geo: marker.position.A.toString() + ', ' + marker.position.F.toString() + ', ' + '4km', 
         consumer_key: 'HSIC4k73HGG4DRQo7sXezxrtXuUHddCLelI81EwX',
         method: 'get',
         dataType: 'json',
@@ -53,8 +53,6 @@
     createImageWindow(response);    
     })    
   };
-
-  $('marker').on('click', getImages);
 
   var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
@@ -68,6 +66,9 @@
       map: map,
       title: 'Uluru (Ayers Rock)'
   });
+
+  console.log(marker.position);
+
   google.maps.event.addListener(marker, 'click', function() {
     getImages().done(function(){newWindow.open(map,marker)});
     
@@ -75,6 +76,7 @@
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
 
 })();
 
