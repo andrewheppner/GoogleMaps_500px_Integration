@@ -24,6 +24,8 @@
 
   var newWindow;
 
+
+//Initialize function creates initial marker and sets up the listeners
   function initialize() {
     var myLatlng = new google.maps.LatLng(43.65,-79.379);
     var mapOptions = {
@@ -31,52 +33,54 @@
       center: myLatlng
     };
 
-  function createImageWindow(response){
-    var imageUrl = response['photos'][0]['image_url'];
-    newWindow = new google.maps.InfoWindow({
-    content: '<div><img src=' + imageUrl + '></div>'
+//Selects the correct image from the JSON response and reates the infowindow div containing this image.
+    function createImageWindow(response){
+      var imageUrl = response['photos'][0]['image_url'];
+      newWindow = new google.maps.InfoWindow({
+      content: '<div><img src=' + imageUrl + '></div>'
+      });
+    };
+
+
+//Listens for clicks on the markers, sends ajax request and calls the create image window function
+    function getImages(){
+      return $.ajax({
+        url: 'https://api.500px.com/v1/photos/search',
+        data: {
+          geo: marker.position.A.toString() + ', ' + marker.position.F.toString() + ', ' + '4km', 
+          consumer_key: 'HSIC4k73HGG4DRQo7sXezxrtXuUHddCLelI81EwX',
+          method: 'get',
+          dataType: 'json',
+          sort: 'rating'
+          }
+      })
+      .done(function(response){
+      createImageWindow(response);    
+      })    
+    };
+
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+    var key = 'HSIC4k73HGG4DRQo7sXezxrtXuUHddCLelI81EwX';
+
+
+    var marker = new google.maps.Marker({
+        position: myLatlng,
+        draggable:true,
+        animation: google.maps.Animation.DROP,
+        map: map
     });
+
+    google.maps.event.addListener(marker, 'click', function() {
+      getImages().done(function(){newWindow.open(map,marker)});  
+    });
+
+    google.maps.event.addListener(marker, 'dragstart', function(){ newWindow.close() } );
   };
 
-  function getImages(){
-    return $.ajax({
-      url: 'https://api.500px.com/v1/photos/search',
-      data: {
-        geo: marker.position.A.toString() + ', ' + marker.position.F.toString() + ', ' + '4km', 
-        consumer_key: 'HSIC4k73HGG4DRQo7sXezxrtXuUHddCLelI81EwX',
-        method: 'get',
-        dataType: 'json',
-        sort: 'rating'
-        }
-    })
-    .done(function(response){
-    createImageWindow(response);    
-    })    
-  };
-
-  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-  var key = 'HSIC4k73HGG4DRQo7sXezxrtXuUHddCLelI81EwX';
-
-
-  var marker = new google.maps.Marker({
-      position: myLatlng,
-      draggable:true,
-      animation: google.maps.Animation.DROP,
-      map: map,
-      title: 'Uluru (Ayers Rock)'
-  });
-
-  console.log(marker.position);
-
-  google.maps.event.addListener(marker, 'click', function() {
-    getImages().done(function(){newWindow.open(map,marker)});
-    
-  });
-}
+//End of Initialize Function--------------------------------------------------------
 
 google.maps.event.addDomListener(window, 'load', initialize);
-
 
 })();
 
